@@ -1,6 +1,20 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 import os
+import json
+
+def get_addon_config():
+    """Read the addon configuration from Home Assistant"""
+    try:
+        with open('/data/options.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        # Fallback for development/testing
+        return {'port': 5000}
+
+# Get configuration
+config = get_addon_config()
+port = config.get('port', 5000)
 
 app = Flask(__name__)
 DB_PATH = "/data/unlocks.db"
@@ -27,6 +41,11 @@ def dict_factory(cursor, row):
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
+@app.route("/", defaults={'path': ''})
+@app.route("/<path:path>")
+def serve_html(path):
+    return send_from_directory("./www", "index.html" if path == "" else path)
 
 @app.route("/sites", methods=["GET"])
 def get_sites():
@@ -67,4 +86,4 @@ def delete_site(id):
     return jsonify({"status": "ok"})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=port)

@@ -1,0 +1,11 @@
+#!/usr/bin/env bashio
+# ==============================================================================
+# Home Assistant Add-on: ownCloud
+# Runs nginx
+# ==============================================================================
+
+# Wait for PHP-FPM to be ready
+bashio::log.info "Starting nginx..."
+
+# Create nginx configuration from template
+exec nginx -g "daemon off;"

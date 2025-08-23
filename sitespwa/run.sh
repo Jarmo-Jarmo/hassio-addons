@@ -1,6 +1,12 @@
-#!/usr/bin/env bash
-# Ensure the data directory exists
-mkdir -p /data
+#!/usr/bin/with-contenv bashio
 
-# Run Flask API
-python3 /app/api.py --host=0.0.0.0 --port=5000
+# Read the port from addon configuration
+PORT=$(bashio::config 'port')
+
+# Expose the port dynamically
+bashio::net.wait_for ${PORT}
+
+echo "Starting addon on port ${PORT}"
+
+# Start your Python application
+exec python3 api.py

@@ -1,0 +1,22 @@
+#!/usr/bin/env bashio
+# ==============================================================================
+# Home Assistant Add-on: ownCloud
+# Runs cron daemon and ownCloud cron jobs
+# ==============================================================================
+
+bashio::log.info "Starting cron daemon..."
+
+# Create cron directory
+mkdir -p /var/spool/cron/crontabs
+
+# Create ownCloud cron job
+cat > /var/spool/cron/crontabs/www-data << 'EOF'
+*/15 * * * * cd /var/www/owncloud && php -f cron.php >/dev/null 2>&1
+EOF
+
+# Set proper permissions
+chown www-data:www-data /var/spool/cron/crontabs/www-data
+chmod 600 /var/spool/cron/crontabs/www-data
+
+# Start cron daemon
+exec crond -f -d 8 -c /var/spool/cron/crontabs

@@ -1,0 +1,128 @@
+#!/usr/bin/env bashio
+# ==============================================================================
+# Home Assistant Add-on: ownCloud
+# Initial configuration and hardening
+# ==============================================================================
+
+# Fetch configuration from Home Assistant
+admin_user=$(bashio::config 'admin_user')
+admin_password=$(bashio::config 'admin_password')
+database_type=$(bashio::config 'database_type')
+mysql_host=$(bashio::config 'mysql_host')
+mysql_database=$(bashio::config 'mysql_database')
+mysql_user=$(bashio::config 'mysql_user')
+mysql_password=$(bashio::config 'mysql_password')
+redis_enabled=$(bashio::config 'redis_enabled')
+redis_host=$(bashio::config 'redis_host')
+redis_password=$(bashio::config 'redis_password')
+log_level=$(bashio::config 'log_level')
+max_upload_size=$(bashio::config 'max_upload_size')
+memory_limit=$(bashio::config 'memory_limit')
+trusted_domains=$(bashio::config 'trusted_domains')
+enable_https=$(bashio::config 'enable_https')
+certfile=$(bashio::config 'certfile')
+keyfile=$(bashio::config 'keyfile')
+
+bashio::log.info "Starting ownCloud initial configuration..."
+
+# Ensure directories exist
+mkdir -p /data/owncloud /var/www/owncloud/config /config/log /share/owncloud
+chown -R www-data:www-data /data/owncloud /var/www/owncloud /share/owncloud
+
+# Check for ownCloud installation
+if [ ! -f /var/www/owncloud/occ ]; then
+    bashio::log.error "ownCloud binary (occ) not found! Installation may be incomplete."
+    exit 1
+fi
+
+# Run installation if not already configured
+if [ ! -f /var/www/owncloud/config/config.php ]; then
+    bashio::log.info "Running first-time ownCloud install as user: ${admin_user}"
+    cd /var/www/owncloud || exit 1
+    if [ "$database_type" = "mysql" ]; then
+        if [ -z "$mysql_host" ] || [ -z "$mysql_database" ] || [ -z "$mysql_user" ]; then
+            bashio::log.error "MySQL config missing. Please set: host/database/user."
+            exit 1
+        fi
+        sudo -u www-data php occ maintenance:install \
+            --database="mysql" \
+            --database-name="$mysql_database" \
+            --database-host="$mysql_host" \
+            --database-user="$mysql_user" \
+            --database-pass="$mysql_password" \
+            --admin-user="$admin_user" \
+            --admin-pass="$admin_password" \
+            --data-dir="/data/owncloud"
+    else
+        sudo -u www-data php occ maintenance:install \
+            --database="sqlite" \
+            --admin-user="$admin_user" \
+            --admin-pass="$admin_password" \
+            --data-dir="/data/owncloud"
+    fi
+    [ $? -eq 0 ] && bashio::log.info "ownCloud installation finished!" || {
+        bashio::log.error "ownCloud installation failed!"; exit 1; }
+fi
+
+cd /var/www/owncloud || exit 1
+
+# Configure trusted domains
+bashio::log.info "Setting trusted domains..."
+sudo -u www-data php occ config:system:delete trusted_domains
+sudo -u www-data php occ config:system:set trusted_domains 0 --value="localhost"
+sudo -u www-data php occ config:system:set trusted_domains 1 --value="127.0.0.1"
+domain_index=2
+for domain in $(bashio::config 'trusted_domains'); do
+    bashio::log.info "Adding trusted domain: $domain"
+    sudo -u www-data php occ config:system:set trusted_domains $domain_index --value="$domain"
+    domain_index=$((domain_index + 1))
+done
+
+# Set Redis cache if enabled
+if bashio::var.true "$redis_enabled"; then
+    bashio::log.info "Configuring Redis..."
+    sudo -u www-data php occ config:system:set memcache.local --value="\\OC\\Memcache\\Redis"
+    sudo -u www-data php occ config:system:set memcache.distributed --value="\\OC\\Memcache\\Redis"
+    sudo -u www-data php occ config:system:set redis host --value="${redis_host:-127.0.0.1}"
+    sudo -u www-data php occ config:system:set redis port --value=6379 --type=integer
+    [ -n "$redis_password" ] && \
+        sudo -u www-data php occ config:system:set redis password --value="$redis_password"
+fi
+
+# General ownCloud settings
+bashio::log.info "Configuring ownCloud system settings..."
+case "$log_level" in
+    debug)   log_level_num=0 ;;
+    info)    log_level_num=1 ;;
+    warning) log_level_num=2 ;;
+    error)   log_level_num=3 ;;
+    *)       log_level_num=1 ;;
+esac
+sudo -u www-data php occ config:system:set loglevel --value=$log_level_num --type=integer
+sudo -u www-data php occ config:system:set check_data_directory_permissions --value=false --type=boolean
+sudo -u www-data php occ config:system:set updatechecker --value=false --type=boolean
+sudo -u www-data php occ config:system:set htaccess.RewriteBase --value="/"
+sudo -u www-data php occ maintenance:update:htaccess
+sudo -u www-data php occ background:cron
+
+# Set permissions/tighten config
+chown www-data:www-data /var/www/owncloud/config/config.php
+chmod 640 /var/www/owncloud/config/config.php
+
+# Configure PHP runtime for uploads/memory
+sed -i "s/upload_max_filesize = .*/upload_max_filesize = $max_upload_size/" /etc/php82/php.ini
+sed -i "s/post_max_size = .*/post_max_size = $max_upload_size/" /etc/php82/php.ini
+sed -i "s/memory_limit = .*/memory_limit = $memory_limit/" /etc/php82/php.ini
+
+# HTTPS if enabled
+if bashio::var.true "$enable_https"; then
+    bashio::log.info "Configuring HTTPS."
+    if [ -f "/ssl/$certfile" ] && [ -f "/ssl/$keyfile" ]; then
+        sudo -u www-data php occ config:system:set overwriteprotocol --value="https"
+        sudo -u www-data php occ config:system:set overwrite.cli.url --value="https://localhost"
+    else
+        bashio::log.warning "SSL certs not found! HTTPS not configured."
+    fi
+fi
+
+bashio::log.info "ownCloud initialization and configuration finished!"

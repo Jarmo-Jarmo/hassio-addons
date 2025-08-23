@@ -1,0 +1,13 @@
+#!/usr/bin/env bashio
+# ==============================================================================
+# Home Assistant Add-on: ownCloud  
+# Runs PHP-FPM
+# ==============================================================================
+
+bashio::log.info "Starting PHP-FPM..."
+
+# Create PHP-FPM socket directory
+mkdir -p /var/run/php
+
+# Start PHP-FPM
+exec php-fpm82 --nodaemonize --fpm-config /etc/php82/php-fpm.conf

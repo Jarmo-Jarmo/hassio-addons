@@ -1,20 +1,11 @@
-# Use official Python slim image
-FROM python:3.12-slim
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
-# Set workdir
+# Copy your application
 WORKDIR /app
+COPY . /app
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
+RUN chmod a+x /app/run.sh
 
-# Copy addon files
-COPY run.sh api.py requirements.txt /app/
-
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Make run.sh executable
-RUN chmod +x /app/run.sh
-
-# Expose port
-EXPOSE 5000
-
-# Command to run
+# Set the command to run your script
 CMD ["/app/run.sh"]
