@@ -1,17 +1,17 @@
-name: Sites PWA Backend
-version: 3.13-alpine3.22
-slug: sitespwa
-description: Backend API for Sites PWA
+name: "Sites PWA Backend"
+version: "3.13-alpine3.22"
+slug: "sitespwa"
+description: "Backend API for Sites PWA"
 arch:
   - armhf
   - armv7
   - aarch64
   - amd64
   - i386
-url: https://github.com/Jarmo-Jarmo/hassio-addons/tree/main/sitespwa
+url: "https://github.com/Jarmo-Jarmo/hassio-addons/tree/main/sitespwa"
 init: false
 options:
   port: 5000
 schema:
-  port: "port"
+  port: "int"
 image: "ghcr.io/home-assistant/{arch}-base-python:3.13-alpine3.22"
