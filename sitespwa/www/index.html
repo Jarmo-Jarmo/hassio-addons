@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock PWA Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <header>
+        <h1>Unlock PWA Dashboard</h1>
+        <button id="addSiteBtn">Add Site</button>
+    </header>
+
+    <main>
+        <ul id="siteList"></ul>
+    </main>
+
+    <!-- Add/Edit Site Modal -->
+    <div id="siteModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle">Add Site</h2>
+            <form id="siteForm">
+                <label>Name: <input type="text" id="siteName" required></label>
+                <label>URL: <input type="url" id="siteUrl" required></label>
+                <label>Timer Hours: <input type="number" id="siteTimer" min="0" required></label>
+                <label>Last Visited (epoch): <input type="number" id="siteLastVisited"></label>
+                <label>Icon URL: <input type="url" id="siteIcon"></label>
+                <input type="hidden" id="siteId">
+                <button type="submit">Save</button>
+                <button type="button" id="cancelBtn">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+name: "Unlock PWA Backend"
+version: "1.0.0"
+slug: "unlockpwa"
+description: "Backend API for Unlock PWA (Flask + SQLite)"
+arch:
+  - "amd64"
+  - "armv7"
+  - "armhf"
+  - "aarch64"
+init: false
+startup: application
+boot: "auto"
+options:
+  port: 5000
+  debug: false
+schema:
+  port: int(1000,65000)
+  debug: bool
+ports:
+  5000/tcp: 5000
+map:
+  - data:rw
+webui: http://[HOST]:5000
+host_network: false
