@@ -84,4 +84,3 @@ schema:
       password: password?
       workgroup: str?
   custom_script: str?
-image: ghcr.io/home-assistant/{arch}-base:3.22

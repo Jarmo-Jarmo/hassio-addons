@@ -1,0 +1,16 @@
+name: "Sites PWA Backend"
+version: "3.13-alpine3.22"
+slug: "sitespwa"
+description: "Backend API for Sites PWA"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+url: "https://github.com/Jarmo-Jarmo/hassio-addons/tree/main/sitespwa"
+init: false
+options:
+  port: 5000
+schema:
+  port: "int"
