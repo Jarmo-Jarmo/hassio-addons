@@ -1,7 +1,7 @@
-name: "Unlock PWA Backend"
+name: "Sites PWA Backend"
 version: "1.0.0"
-slug: "unlockpwa"
-description: "Backend API for Unlock PWA (Flask + SQLite)"
+slug: "sitespwa"
+description: "Backend API for Sites PWA (Flask + SQLite)"
 arch:
   - "amd64"
   - "armv7"
