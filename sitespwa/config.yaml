@@ -13,5 +13,5 @@ init: false
 options:
   port: 5000
 schema:
-  port: "port"
-image: "ghcr.io/home-assistant/{arch}-base-python:3.13-alpine3.22"
+  port: int(1000, 65535)
+image: ghcr.io/home-assistant/{arch}-base-python
