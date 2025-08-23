@@ -14,4 +14,4 @@ options:
   port: 5000
 schema:
   port: "port"
-image: "ghcr.io/home-assistant/{arch}-base-python"
+image: "ghcr.io/home-assistant/{arch}-base-python:3.13-alpine3.22"
