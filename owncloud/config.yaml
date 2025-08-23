@@ -1,5 +1,5 @@
 name: ownCloud
-version: "1.0.0"
+version: 3.22
 slug: owncloud
 description: ownCloud personal cloud storage server for Home Assistant
 url: https://github.com/Jarmo-Jarmo/hassio-addons/tree/main/owncloud
@@ -84,4 +84,4 @@ schema:
       password: password?
       workgroup: str?
   custom_script: str?
-image: ghcr.io/home-assistant/{arch}-base
+image: ghcr.io/home-assistant/{arch}-base:3.22
