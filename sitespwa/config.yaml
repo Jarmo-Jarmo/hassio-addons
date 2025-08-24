@@ -12,4 +12,4 @@ options:
   port: 5000
 schema:
   port: "int"
-image: ghcr.io/jarmo-jarmo/{arch}sitespwa:latest
+image: ghcr.io/jarmo-jarmo/{arch}sitespwa
