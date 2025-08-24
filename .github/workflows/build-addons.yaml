@@ -74,6 +74,15 @@ jobs:
           fi
           echo "BUILD_FROM=${BUILD_FROM}" >> $GITHUB_OUTPUT
 
+      # Read version from config.yaml
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(yq '.version' "./${{ matrix.addon }}/config.yaml")
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - id: meta
         if: >
           github.event_name == 'workflow_dispatch' ||
@@ -83,10 +92,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ matrix.arch }}-${{ matrix.addon }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.version.outputs.version }}
 
       - if: steps.meta.conclusion == 'success'
         uses: docker/build-push-action@v5
