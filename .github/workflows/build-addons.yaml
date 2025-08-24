@@ -2,16 +2,12 @@ name: Build and Push Add-ons
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
     paths:
       - 'sitespwa/**'
       - 'owncloud/**'
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
     paths:
       - 'sitespwa/**'
       - 'owncloud/**'
@@ -38,34 +34,16 @@ jobs:
             owncloud:
               - 'owncloud/**'
 
-  build:
+  build-addons:
     needs: changes
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.sitespwa == 'true' || needs.changes.outputs.owncloud == 'true' }}
     strategy:
       matrix:
-        addon: []
-      max-parallel: 2
-    steps:
-      - name: Set matrix dynamically
-        id: set-matrix
-        run: |
-          addons=()
-          if [[ "${{ needs.changes.outputs.sitespwa }}" == "true" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            addons+=("sitespwa")
-          fi
-          if [[ "${{ needs.changes.outputs.owncloud }}" == "true" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            addons+=("owncloud")
-          fi
-          echo "matrix={\"addon\":[\"${addons[*]}\"]}" >> $GITHUB_OUTPUT
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-
-  build-addons:
-    needs: [changes, build]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+        addon: [ sitespwa, owncloud ]
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (matrix.addon == 'sitespwa' && needs.changes.outputs.sitespwa == 'true') ||
+      (matrix.addon == 'owncloud' && needs.changes.outputs.owncloud == 'true')
     permissions:
       contents: read
       packages: write
