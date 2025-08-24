@@ -1,5 +1,5 @@
 name: "Sites PWA Backend"
-version: "3.13-alpine3.22"
+version: "1.0.0"
 slug: "sitespwa"
 description: "Backend API for Sites PWA"
 arch:
@@ -14,3 +14,4 @@ options:
   port: 5000
 schema:
   port: "int"
+image: ghcr.io/jarmo-jarmo/sitespwa
