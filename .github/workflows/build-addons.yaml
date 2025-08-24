@@ -1,4 +1,4 @@
-name: Build and Push Add-ons
+name: Build and Push Add-ons (Separate Architectures)
 
 on:
   push:
@@ -40,17 +40,12 @@ jobs:
     strategy:
       matrix:
         addon: [ sitespwa, owncloud ]
+        arch: [ amd64, i386, arm64, armv7, armhf ]
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
-
-      # Setup QEMU so multi-arch builds work
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: all
 
       - uses: docker/setup-buildx-action@v3
 
@@ -60,29 +55,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Determine which add-ons to build and base images per architecture
-      - name: Set BUILD_FROM per platform
+      # Correctly set BUILD_FROM for each add-on and architecture
+      - name: Set BUILD_FROM
         id: buildargs
         run: |
-          declare -A base
           if [ "${{ matrix.addon }}" = "sitespwa" ]; then
-            base=( ["amd64"]="ghcr.io/home-assistant/amd64-base:3.22"
-                   ["i386"]="ghcr.io/home-assistant/i386-base:3.22"
-                   ["arm64"]="ghcr.io/home-assistant/aarch64-base:3.22"
-                   ["armv7"]="ghcr.io/home-assistant/armv7-base:3.22"
-                   ["armhf"]="ghcr.io/home-assistant/armhf-base:3.22" )
+            case "${{ matrix.arch }}" in
+              amd64) BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.22" ;;
+              i386) BUILD_FROM="ghcr.io/home-assistant/i386-base:3.22" ;;
+              arm64) BUILD_FROM="ghcr.io/home-assistant/aarch64-base:3.22" ;;
+              armv7) BUILD_FROM="ghcr.io/home-assistant/armv7-base:3.22" ;;
+              armhf) BUILD_FROM="ghcr.io/home-assistant/armhf-base:3.22" ;;
+            esac
           else
-            base=( ["amd64"]="ghcr.io/home-assistant/amd64-base-python:3.13-alpine3.22"
-                   ["i386"]="ghcr.io/home-assistant/i386-base-python:3.13-alpine3.22"
-                   ["arm64"]="ghcr.io/home-assistant/aarch64-base-python:3.13-alpine3.22"
-                   ["armv7"]="ghcr.io/home-assistant/armv7-base-python:3.13-alpine3.22"
-                   ["armhf"]="ghcr.io/home-assistant/armhf-base-python:3.13-alpine3.22" )
+            case "${{ matrix.arch }}" in
+              amd64) BUILD_FROM="ghcr.io/home-assistant/amd64-base-python:3.13-alpine3.22" ;;
+              i386) BUILD_FROM="ghcr.io/home-assistant/i386-base-python:3.13-alpine3.22" ;;
+              arm64) BUILD_FROM="ghcr.io/home-assistant/aarch64-base-python:3.13-alpine3.22" ;;
+              armv7) BUILD_FROM="ghcr.io/home-assistant/armv7-base-python:3.13-alpine3.22" ;;
+              armhf) BUILD_FROM="ghcr.io/home-assistant/armhf-base-python:3.13-alpine3.22" ;;
+            esac
           fi
-          echo "BUILD_FROM_AMD64=${base[amd64]}" >> $GITHUB_OUTPUT
-          echo "BUILD_FROM_I386=${base[i386]}" >> $GITHUB_OUTPUT
-          echo "BUILD_FROM_ARM64=${base[arm64]}" >> $GITHUB_OUTPUT
-          echo "BUILD_FROM_ARMV7=${base[armv7]}" >> $GITHUB_OUTPUT
-          echo "BUILD_FROM_ARMHF=${base[armhf]}" >> $GITHUB_OUTPUT
+          echo "BUILD_FROM=${BUILD_FROM}" >> $GITHUB_OUTPUT
 
       - id: meta
         if: >
@@ -106,12 +100,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/386
+          platforms: linux/${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            BUILD_FROM_AMD64=${{ steps.buildargs.outputs.BUILD_FROM_AMD64 }}
-            BUILD_FROM_I386=${{ steps.buildargs.outputs.BUILD_FROM_I386 }}
-            BUILD_FROM_ARM64=${{ steps.buildargs.outputs.BUILD_FROM_ARM64 }}
-            BUILD_FROM_ARMV7=${{ steps.buildargs.outputs.BUILD_FROM_ARMV7 }}
-            BUILD_FROM_ARMHF=${{ steps.buildargs.outputs.BUILD_FROM_ARMHF }}
+            BUILD_FROM=${{ steps.buildargs.outputs.BUILD_FROM }}
