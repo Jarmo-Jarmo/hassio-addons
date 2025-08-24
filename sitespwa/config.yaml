@@ -8,8 +8,12 @@ arch:
   - i386
 url: "https://github.com/Jarmo-Jarmo/hassio-addons/tree/main/sitespwa"
 init: false
+ports:
+  443/tcp: 5000
+  80/tcp: null
+ports_description:
+  443/tcp: "Https Web Interface"
+  80/tcp: "Web interface"
 options:
-  port: 5000
 schema:
-  port: "int"
 image: ghcr.io/jarmo-jarmo/{arch}-sitespwa
