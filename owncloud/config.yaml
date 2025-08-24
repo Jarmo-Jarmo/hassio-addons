@@ -83,4 +83,4 @@ schema:
       password: password?
       workgroup: str?
   custom_script: str?
-image: ghcr.io/jarmo-jarmo/owncloud:latest
+image: ghcr.io/jarmo-jarmo/{arch}-owncloud:latest
