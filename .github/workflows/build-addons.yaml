@@ -54,6 +54,30 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Determine which add-ons to build
+      - name: Set BUILD_FROM per platform
+        id: buildargs
+        run: |
+          declare -A base
+          if [ "${{ matrix.addon }}" = "sitespwa" ]; then
+            base=( ["amd64"]="ghcr.io/home-assistant/amd64-base:3.22"
+                   ["i386"]="ghcr.io/home-assistant/i386-base:3.22"
+                   ["arm64"]="ghcr.io/home-assistant/aarch64-base:3.22"
+                   ["armv7"]="ghcr.io/home-assistant/armv7-base:3.22"
+                   ["armhf"]="ghcr.io/home-assistant/armhf-base:3.22" )
+          else
+            base=( ["amd64"]="ghcr.io/home-assistant/amd64-base-python:3.13-alpine3.22"
+                   ["i386"]="ghcr.io/home-assistant/i386-base-python:3.13-alpine3.22"
+                   ["arm64"]="ghcr.io/home-assistant/aarch64-base-python:3.13-alpine3.22"
+                   ["armv7"]="ghcr.io/home-assistant/armv7-base-python:3.13-alpine3.22"
+                   ["armhf"]="ghcr.io/home-assistant/armhf-base-python:3.13-alpine3.22" )
+          fi
+          echo "BUILD_FROM_AMD64=${base[amd64]}" >> $GITHUB_OUTPUT
+          echo "BUILD_FROM_I386=${base[i386]}" >> $GITHUB_OUTPUT
+          echo "BUILD_FROM_ARM64=${base[arm64]}" >> $GITHUB_OUTPUT
+          echo "BUILD_FROM_ARMV7=${base[armv7]}" >> $GITHUB_OUTPUT
+          echo "BUILD_FROM_ARMHF=${base[armhf]}" >> $GITHUB_OUTPUT
+
       - id: meta
         if: >
           github.event_name == 'workflow_dispatch' ||
@@ -79,3 +103,9 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/386
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_FROM_AMD64=${{ steps.buildargs.outputs.BUILD_FROM_AMD64 }}
+            BUILD_FROM_I386=${{ steps.buildargs.outputs.BUILD_FROM_I386 }}
+            BUILD_FROM_ARM64=${{ steps.buildargs.outputs.BUILD_FROM_ARM64 }}
+            BUILD_FROM_ARMV7=${{ steps.buildargs.outputs.BUILD_FROM_ARMV7 }}
+            BUILD_FROM_ARMHF=${{ steps.buildargs.outputs.BUILD_FROM_ARMHF }}
