@@ -81,7 +81,7 @@ jobs:
           (matrix.addon == 'owncloud' && needs.changes.outputs.owncloud == 'true')
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ matrix.addon }}
+          images: ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER }}/${{ matrix.arch }}-${{ matrix.addon }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
