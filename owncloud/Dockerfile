@@ -3,19 +3,8 @@
 #============================#
 # Dockerfile for ownCloud Home Assistant Add-on
 
-# Declare build args for each architecture
-ARG BUILD_FROM_AMD64
-ARG BUILD_FROM_I386
-ARG BUILD_FROM_ARM64
-ARG BUILD_FROM_ARMV7
-#ARG BUILD_FROM_ARMHF
-
-# Select the correct one based on the target platform
-FROM ${BUILD_FROM_AMD64} AS amd64
-FROM ${BUILD_FROM_I386} AS i386
-FROM ${BUILD_FROM_ARM64} AS arm64
-FROM ${BUILD_FROM_ARMV7} AS armv7
-#FROM ${BUILD_FROM_ARMHF} AS armhf
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
