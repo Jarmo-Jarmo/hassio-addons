@@ -3,8 +3,6 @@ version: "1.0.0"
 slug: "sitespwa"
 description: "Backend API for Sites PWA"
 arch:
-#  - armhf
-  - armv7
   - aarch64
   - amd64
   - i386

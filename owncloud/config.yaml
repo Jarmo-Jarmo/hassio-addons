@@ -6,8 +6,6 @@ url: https://github.com/Jarmo-Jarmo/hassio-addons/tree/main/owncloud
 arch:
   - aarch64
   - amd64
-#  - armhf
-  - armv7
   - i386
 init: false
 startup: services

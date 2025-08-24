@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         addon: [ sitespwa, owncloud ]
-        arch: [ amd64, i386, arm64, armv7, armhf ]
+        arch: [ amd64, i386, arm64 ]
     permissions:
       contents: read
       packages: write
@@ -61,19 +61,15 @@ jobs:
         run: |
           if [ "${{ matrix.addon }}" = "sitespwa" ]; then
             case "${{ matrix.arch }}" in
-              amd64) BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.22" ;;
-              i386) BUILD_FROM="ghcr.io/home-assistant/i386-base:3.22" ;;
-              arm64) BUILD_FROM="ghcr.io/home-assistant/aarch64-base:3.22" ;;
-              armv7) BUILD_FROM="ghcr.io/home-assistant/armv7-base:3.22" ;;
-              armhf) BUILD_FROM="ghcr.io/home-assistant/armhf-base:3.22" ;;
-            esac
-          else
-            case "${{ matrix.arch }}" in
               amd64) BUILD_FROM="ghcr.io/home-assistant/amd64-base-python:3.13-alpine3.22" ;;
               i386) BUILD_FROM="ghcr.io/home-assistant/i386-base-python:3.13-alpine3.22" ;;
               arm64) BUILD_FROM="ghcr.io/home-assistant/aarch64-base-python:3.13-alpine3.22" ;;
-              armv7) BUILD_FROM="ghcr.io/home-assistant/armv7-base-python:3.13-alpine3.22" ;;
-              armhf) BUILD_FROM="ghcr.io/home-assistant/armhf-base-python:3.13-alpine3.22" ;;
+            esac
+          else
+            case "${{ matrix.arch }}" in
+              amd64) BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.22" ;;
+              i386) BUILD_FROM="ghcr.io/home-assistant/i386-base:3.22" ;;
+              arm64) BUILD_FROM="ghcr.io/home-assistant/aarch64-base:3.22" ;;
             esac
           fi
           echo "BUILD_FROM=${BUILD_FROM}" >> $GITHUB_OUTPUT
