@@ -71,8 +71,8 @@ jobs:
       - if: steps.meta.conclusion == 'success'
         uses: docker/build-push-action@v5
         with:
-          context: ./{{ matrix.addon }}
-          file: ./{{ matrix.addon }}/Dockerfile
+          context: ./${{ matrix.addon }}
+          file: ./${{ matrix.addon }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
